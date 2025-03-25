@@ -1,5 +1,5 @@
 import { IsString, IsInt, IsNumber, Min, Max } from 'class-validator';
-import { IsValidReleaseYear } from '../../validators/release-year.validator';
+import { IsValidReleaseYear } from '../validators/release-year.validator';
 
 export class CreateMovieDto {
   @IsString()
