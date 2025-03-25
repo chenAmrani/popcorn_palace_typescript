@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MoviesModule } from './movies/movies.module';
+import { BookingsModule } from './booking/bookings.module';
 import { ShowtimesModule } from './showtimes/showtimes.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -19,6 +20,7 @@ import { AppService } from './app.service';
     }),
     MoviesModule,
     ShowtimesModule,
+    BookingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

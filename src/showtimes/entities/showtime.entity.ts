@@ -1,5 +1,12 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import { Movie } from '../../movies/entities/movie.entity';
+import { Booking } from 'src/booking/entities/booking.entity';
 
 @Entity('showtimes')
 export class Showtime {
@@ -20,4 +27,7 @@ export class Showtime {
 
   @Column({ type: 'float', nullable: false })
   price: number;
+
+  @OneToMany(() => Booking, (booking) => booking.showtime)
+  bookings: Booking[];
 }
