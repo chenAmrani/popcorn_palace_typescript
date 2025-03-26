@@ -42,6 +42,9 @@ export class MoviesService {
       if (error.code === '23505') {
         throw new BadRequestException('Movie already exists.');
       }
+      if (error.name === 'QueryFailedError') {
+        throw new BadRequestException(error.message);
+      }
       throw error;
     }
   }
