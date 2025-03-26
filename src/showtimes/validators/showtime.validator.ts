@@ -29,12 +29,12 @@ export async function validateNoOverlappingShowtimes(
     .where('Showtime.theater = :theater', { theater })
     .andWhere(
       `(
-        Showtime.start_time < :end
-        AND Showtime.end_time > :start
+        Showtime.start_time <= :end
+        AND Showtime.end_time >= :start
       )`,
     )
-    .setParameter('start', start_time)
-    .setParameter('end', end_time)
+    .setParameter('start', new Date(start_time))
+    .setParameter('end', new Date(end_time))
     .getOne();
 
   if (overlap) {
