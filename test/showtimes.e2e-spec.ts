@@ -5,7 +5,7 @@ import { AppModule } from '../src/app.module';
 
 describe('ShowtimesController (e2e)', () => {
   let app: INestApplication;
-  let createdId: number;
+  let createdShowtimeId: number;
   let movieIdTest: number;
 
   beforeAll(async () => {
@@ -20,7 +20,9 @@ describe('ShowtimesController (e2e)', () => {
       title: 'Test Movie',
       description: 'A movie created for testing',
       duration: 120,
-      release_date: '2025-01-01T00:00:00.000Z',
+      genre: 'Action',
+      rating: 5,
+      release_year: 2025,
     });
 
     movieIdTest = movieRes.body.id;
@@ -28,6 +30,9 @@ describe('ShowtimesController (e2e)', () => {
 
   afterAll(async () => {
     await request(app.getHttpServer()).delete(`/movies/${movieIdTest}`);
+    await request(app.getHttpServer()).delete(
+      `/showtimes/${createdShowtimeId}`,
+    );
     await app.close();
   });
 
@@ -89,13 +94,13 @@ describe('ShowtimesController (e2e)', () => {
       .send({
         movieId: movieIdTest,
         theater: 'Cinema City',
-        start_time: '2025-08-01T18:00:00.000Z',
-        end_time: '2025-08-01T20:00:00.000Z',
+        start_time: '2025-08-01T10:00:00.000Z',
+        end_time: '2025-08-01T12:00:00.000Z',
         price: 60,
       })
       .expect(201);
 
-    createdId = res.body.id;
+    createdShowtimeId = res.body.id;
     expect(res.body).toHaveProperty('id');
     expect(res.body.theater).toBe('Cinema City');
   });
@@ -122,8 +127,8 @@ describe('ShowtimesController (e2e)', () => {
       .send({
         movieId: movieIdTest,
         theater: 'Cinema City',
-        start_time: '2025-08-01T19:00:00.000Z',
-        end_time: '2025-08-01T20:00:00.000Z',
+        start_time: '2025-08-01T11:00:00.000Z',
+        end_time: '2025-08-01T12:00:00.000Z',
         price: 60,
       })
       .expect(400)
@@ -134,7 +139,7 @@ describe('ShowtimesController (e2e)', () => {
 
   it('PUT /showtimes/update/:id - attempt to update into overlapping time => should fail', async () => {
     await request(app.getHttpServer())
-      .put(`/showtimes/update/${createdId}`)
+      .put(`/showtimes/update/${createdShowtimeId}`)
       .send({
         start_time: '2025-08-01T19:00:00.000Z',
         end_time: '2025-08-01T21:00:00.000Z',
@@ -169,15 +174,15 @@ describe('ShowtimesController (e2e)', () => {
 
   it('GET /showtimes/:id - return a specific showtime', async () => {
     const res = await request(app.getHttpServer())
-      .get(`/showtimes/${createdId}`)
+      .get(`/showtimes/${createdShowtimeId}`)
       .expect(200);
 
-    expect(res.body.id).toBe(createdId);
+    expect(res.body.id).toBe(createdShowtimeId);
   });
 
   it('PUT /showtimes/update/:id - update showtime price', async () => {
     const res = await request(app.getHttpServer())
-      .put(`/showtimes/update/${createdId}`)
+      .put(`/showtimes/update/${createdShowtimeId}`)
       .send({ price: 100 })
       .expect(200);
 
@@ -186,7 +191,7 @@ describe('ShowtimesController (e2e)', () => {
 
   it('PUT /showtimes/update/:id - invalid new time range', async () => {
     await request(app.getHttpServer())
-      .put(`/showtimes/update/${createdId}`)
+      .put(`/showtimes/update/${createdShowtimeId}`)
       .send({
         start_time: '2025-08-01T21:00:00.000Z',
         end_time: '2025-08-01T20:00:00.000Z',
@@ -218,7 +223,7 @@ describe('ShowtimesController (e2e)', () => {
 
   it('PUT /showtimes/update/:id - invalid date format on update', async () => {
     await request(app.getHttpServer())
-      .put(`/showtimes/update/${createdId}`)
+      .put(`/showtimes/update/${createdShowtimeId}`)
       .send({ start_time: 'not-a-real-date-string' })
       .expect(400)
       .expect((res) => {
@@ -246,7 +251,7 @@ describe('ShowtimesController (e2e)', () => {
 
   it('DELETE /showtimes/:id - delete showtime', async () => {
     const res = await request(app.getHttpServer())
-      .delete(`/showtimes/${createdId}`)
+      .delete(`/showtimes/${createdShowtimeId}`)
       .expect(200);
 
     expect(res.body.message).toContain('was deleted successfully');
@@ -254,13 +259,13 @@ describe('ShowtimesController (e2e)', () => {
 
   it('GET /showtimes/:id - get deleted showtime returns 404', async () => {
     await request(app.getHttpServer())
-      .get(`/showtimes/${createdId}`)
+      .get(`/showtimes/${createdShowtimeId}`)
       .expect(404);
   });
 
   it('DELETE /showtimes/:id - delete non-existent showtime returns 404', async () => {
     await request(app.getHttpServer())
-      .delete(`/showtimes/${createdId}`)
+      .delete(`/showtimes/${createdShowtimeId}`)
       .expect(404);
   });
 });
