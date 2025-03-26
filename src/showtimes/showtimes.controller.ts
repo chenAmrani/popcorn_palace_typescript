@@ -6,6 +6,9 @@ import {
   Param,
   Delete,
   Put,
+  ParseIntPipe,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { ShowtimesService } from './showtimes.service';
 import { Showtime } from './entities/showtime.entity';
@@ -22,25 +25,37 @@ export class ShowtimesController {
   }
 
   @Post()
+  @HttpCode(HttpStatus.CREATED)
   addShowtime(@Body() showtimeData: CreateShowtimeDto): Promise<Showtime> {
     return this.showtimesService.addShowtime(showtimeData);
   }
 
+  @Get('/bookings')
+  getShowtimesWithBookingCount() {
+    return this.showtimesService.getShowtimesWithBookingCount();
+  }
+
   @Get('/:id')
-  getShowtimeById(@Param('id') id: number): Promise<Showtime> {
+  getShowtimeById(@Param('id', ParseIntPipe) id: number): Promise<Showtime> {
     return this.showtimesService.getShowtimeById(id);
   }
 
   @Put('/update/:id')
   updateShowtime(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updatedData: UpdateShowtimeDto,
   ): Promise<Showtime> {
     return this.showtimesService.updateShowtime(id, updatedData);
   }
 
   @Delete('/:id')
-  deleteShowtime(@Param('id') id: number): Promise<void> {
-    return this.showtimesService.deleteShowtime(id);
+  async deleteShowtime(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<{ message: string }> {
+    const success = await this.showtimesService.deleteShowtime(id);
+    if (!success) {
+      throw new Error(`Showtime with ID ${id} not found.`);
+    }
+    return { message: `Showtime with ID ${id} was deleted successfully.` };
   }
 }

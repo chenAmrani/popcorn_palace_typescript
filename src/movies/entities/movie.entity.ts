@@ -1,6 +1,14 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Showtime } from '../../showtimes/entities/showtime.entity';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  Unique,
+  OneToMany,
+} from 'typeorm';
 
 @Entity('movies')
+@Unique(['title', 'release_year'])
 export class Movie {
   @PrimaryGeneratedColumn()
   id: number;
@@ -19,4 +27,7 @@ export class Movie {
 
   @Column({ type: 'int', nullable: false })
   release_year: number;
+
+  @OneToMany(() => Showtime, (showtime) => showtime.movie)
+  showtimes: Showtime[];
 }

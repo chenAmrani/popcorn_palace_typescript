@@ -4,28 +4,33 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   OneToMany,
+  JoinColumn,
 } from 'typeorm';
 import { Movie } from '../../movies/entities/movie.entity';
-import { Booking } from 'src/booking/entities/booking.entity';
+import { Booking } from '../../booking/entities/booking.entity';
 
 @Entity('showtimes')
 export class Showtime {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Movie, (movie) => movie.id, { nullable: false })
-  movieId: number;
+  @ManyToOne(() => Movie, (movie) => movie.showtimes, {
+    nullable: false,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'movieId' })
+  movie: Movie;
 
-  @Column({ nullable: false })
+  @Column()
   theater: string;
 
-  @Column({ type: 'timestamp', nullable: false })
+  @Column({ type: 'timestamp' })
   start_time: Date;
 
-  @Column({ type: 'timestamp', nullable: false })
+  @Column({ type: 'timestamp' })
   end_time: Date;
 
-  @Column({ type: 'float', nullable: false })
+  @Column({ type: 'float' })
   price: number;
 
   @OneToMany(() => Booking, (booking) => booking.showtime)

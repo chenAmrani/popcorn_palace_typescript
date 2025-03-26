@@ -1,9 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Showtime } from './entities/showtime.entity';
 import { CreateShowtimeDto } from './dto/create-showtime.dto';
 import { UpdateShowtimeDto } from './dto/update-showtime.dto';
+import { Movie } from '../movies/entities/movie.entity';
 
 import {
   validateStartTimeInFuture,
@@ -16,38 +22,104 @@ export class ShowtimesService {
   constructor(
     @InjectRepository(Showtime)
     private readonly showtimeRepository: Repository<Showtime>,
+    @InjectRepository(Movie)
+    private readonly movieRepository: Repository<Movie>,
   ) {}
 
   async getAllShowtimes(): Promise<Showtime[]> {
-    return await this.showtimeRepository.find();
+    return this.showtimeRepository.find({ relations: ['movie'] });
   }
 
-  async addShowtime(showtimeData: CreateShowtimeDto): Promise<Showtime> {
-    const startTime = new Date(showtimeData.start_time);
-    const endTime = new Date(showtimeData.end_time);
-
-    validateStartTimeInFuture(startTime);
-    validateEndTimeAfterStartTime(startTime, endTime);
-
-    await validateNoOverlappingShowtimes(showtimeData, this.showtimeRepository);
-
-    const newShowtime = this.showtimeRepository.create({
-      ...showtimeData,
-      start_time: startTime,
-      end_time: endTime,
-    });
-
-    return await this.showtimeRepository.save(newShowtime);
+  async getShowtimesWithBookingCount(): Promise<
+    {
+      id: number;
+      theater: string;
+      start_time: Date;
+      end_time: Date;
+      price: number;
+      movie_title: string;
+      ticketsSold: number;
+    }[]
+  > {
+    return this.showtimeRepository
+      .createQueryBuilder('s')
+      .leftJoin('s.movie', 'm')
+      .leftJoin('s.bookings', 'b')
+      .select([
+        's.id AS id',
+        's.theater AS theater',
+        's.start_time AS start_time',
+        's.end_time AS end_time',
+        's.price AS price',
+        'm.title AS movie_title',
+        'COUNT(b.id) AS "ticketsSold"',
+      ])
+      .groupBy('s.id')
+      .addGroupBy('m.title')
+      .orderBy('s.start_time', 'ASC')
+      .getRawMany();
   }
 
   async getShowtimeById(id: number): Promise<Showtime> {
-    const showtime = await this.showtimeRepository.findOne({ where: { id } });
-
+    const showtime = await this.showtimeRepository.findOne({
+      where: { id },
+      relations: ['movie'],
+    });
     if (!showtime) {
       throw new NotFoundException(`Showtime with ID ${id} not found.`);
     }
-
     return showtime;
+  }
+
+  async addShowtime(showtimeData: CreateShowtimeDto): Promise<Showtime> {
+    if (!showtimeData.theater) {
+      throw new BadRequestException('theater is required.');
+    }
+    const { start_time, end_time, price, movieId } = showtimeData;
+
+    const startTime = new Date(start_time);
+    const endTime = new Date(end_time);
+
+    if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
+      throw new BadRequestException(
+        'start_time or end_time is not a valid ISO date.',
+      );
+    }
+    if (price <= 0) {
+      throw new BadRequestException('Price must be a positive number.');
+    }
+
+    validateStartTimeInFuture(startTime);
+    validateEndTimeAfterStartTime(startTime, endTime);
+    try {
+      await validateNoOverlappingShowtimes(
+        showtimeData,
+        this.showtimeRepository,
+      );
+
+      const movie = await this.movieRepository.findOne({
+        where: { id: movieId },
+      });
+      if (!movie) {
+        throw new BadRequestException(
+          `Movie with ID ${movieId} does not exist.`,
+        );
+      }
+
+      const newShowtime = this.showtimeRepository.create({
+        ...showtimeData,
+        start_time: startTime,
+        end_time: endTime,
+      });
+      newShowtime.movie = movie;
+
+      return this.showtimeRepository.save(newShowtime);
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('An unexpected error occurred.');
+    }
   }
 
   async updateShowtime(
@@ -55,15 +127,63 @@ export class ShowtimesService {
     updatedData: UpdateShowtimeDto,
   ): Promise<Showtime> {
     const showtime = await this.getShowtimeById(id);
-    Object.assign(showtime, updatedData);
-    return await this.showtimeRepository.save(showtime);
+
+    const startTime = updatedData.start_time
+      ? new Date(updatedData.start_time)
+      : showtime.start_time;
+    const endTime = updatedData.end_time
+      ? new Date(updatedData.end_time)
+      : showtime.end_time;
+
+    if (updatedData.price && updatedData.price <= 0) {
+      throw new BadRequestException('Price must be a positive number.');
+    }
+
+    if (updatedData.start_time || updatedData.end_time) {
+      if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
+        throw new BadRequestException(
+          'start_time or end_time is not a valid ISO date.',
+        );
+      }
+      validateStartTimeInFuture(startTime);
+      validateEndTimeAfterStartTime(startTime, endTime);
+
+      await validateNoOverlappingShowtimes(
+        {
+          ...showtime,
+          ...updatedData,
+          start_time: startTime,
+          end_time: endTime,
+        },
+        this.showtimeRepository,
+      );
+    }
+
+    if (updatedData.movieId) {
+      const movie = await this.movieRepository.findOne({
+        where: { id: updatedData.movieId },
+      });
+      if (!movie) {
+        throw new BadRequestException(
+          `Movie with ID ${updatedData.movieId} does not exist.`,
+        );
+      }
+      showtime.movie = movie;
+    }
+
+    Object.assign(showtime, updatedData, {
+      start_time: startTime,
+      end_time: endTime,
+    });
+
+    return this.showtimeRepository.save(showtime);
   }
 
-  async deleteShowtime(id: number): Promise<void> {
-    const result = await this.showtimeRepository.delete({ id });
-
+  async deleteShowtime(id: number): Promise<boolean> {
+    const result = await this.showtimeRepository.delete(id);
     if (result.affected === 0) {
       throw new NotFoundException(`Showtime with ID ${id} not found.`);
     }
+    return true;
   }
 }

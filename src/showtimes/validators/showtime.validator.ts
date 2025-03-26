@@ -1,50 +1,45 @@
 import { BadRequestException } from '@nestjs/common';
-import { LessThan, MoreThan, Between, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Showtime } from '../entities/showtime.entity';
+import { CreateShowtimeDto } from '../dto/create-showtime.dto';
 
-export const validateStartTimeInFuture = (startTime: Date) => {
-  if (startTime <= new Date()) {
-    throw new BadRequestException('Start time must be a future date.');
+export function validateStartTimeInFuture(startTime: Date) {
+  const now = new Date();
+  if (startTime <= now) {
+    throw new BadRequestException('Start time must be in the future.');
   }
-};
+}
 
-export const validateEndTimeAfterStartTime = (
-  startTime: Date,
-  endTime: Date,
-) => {
+export function validateEndTimeAfterStartTime(startTime: Date, endTime: Date) {
   if (endTime <= startTime) {
     throw new BadRequestException('End time must be after start time.');
   }
-};
+}
 
-export const validateNoOverlappingShowtimes = async (
-  showtimeData: any,
-  showtimeRepository: Repository<Showtime>,
-) => {
-  const startTime = new Date(showtimeData.start_time);
-  const endTime = new Date(showtimeData.end_time);
+export async function validateNoOverlappingShowtimes(
+  showtimeData:
+    | CreateShowtimeDto
+    | { theater: string; start_time: Date; end_time: Date },
+  showtimeRepo: Repository<Showtime>,
+) {
+  const { theater, start_time, end_time } = showtimeData;
 
-  const overlappingShowtime = await showtimeRepository.findOne({
-    where: [
-      {
-        theater: showtimeData.theater,
-        start_time: LessThan(endTime),
-        end_time: MoreThan(startTime),
-      },
-      {
-        theater: showtimeData.theater,
-        start_time: Between(startTime, endTime),
-      },
-      {
-        theater: showtimeData.theater,
-        end_time: Between(startTime, endTime),
-      },
-    ],
-  });
+  const overlap = await showtimeRepo
+    .createQueryBuilder('Showtime')
+    .where('Showtime.theater = :theater', { theater })
+    .andWhere(
+      `(
+        Showtime.start_time < :end
+        AND Showtime.end_time > :start
+      )`,
+    )
+    .setParameter('start', start_time)
+    .setParameter('end', end_time)
+    .getOne();
 
-  if (overlappingShowtime) {
+  if (overlap) {
     throw new BadRequestException(
       'This theater already has a scheduled showtime that overlaps with the selected time.',
     );
   }
-};
+}

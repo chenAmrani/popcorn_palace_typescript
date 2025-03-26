@@ -21,21 +21,41 @@ export class MoviesController {
     return this.moviesService.getAllMovies();
   }
 
+  @Get('/:id')
+  getMovieById(@Param('id') id: number): Promise<Movie> {
+    return this.moviesService.getMovieById(id);
+  }
+
   @Post()
   addMovie(@Body() movieData: CreateMovieDto): Promise<Movie> {
     return this.moviesService.addMovie(movieData);
   }
 
   @Put('/update/:title')
-  updateMovie(
+  updateMovieByTitle(
     @Param('title') title: string,
     @Body() updatedData: UpdateMovieDto,
   ): Promise<Movie> {
-    return this.moviesService.updateMovie(title, updatedData);
+    return this.moviesService.updateMovieByTitle(title, updatedData);
+  }
+
+  @Put('/update/id/:id')
+  updateMovieById(
+    @Param('id') id: number,
+    @Body() updatedData: UpdateMovieDto,
+  ): Promise<Movie> {
+    return this.moviesService.updateMovieById(id, updatedData);
   }
 
   @Delete('/:title')
-  deleteMovie(@Param('title') title: string): Promise<void> {
-    return this.moviesService.deleteMovie(title);
+  deleteMovieByTitle(
+    @Param('title') title: string,
+  ): Promise<{ message: string }> {
+    return this.moviesService.deleteMovieByTitle(title);
+  }
+
+  @Delete('/id/:id')
+  deleteMovieById(@Param('id') id: number): Promise<{ message: string }> {
+    return this.moviesService.deleteMovieById(id);
   }
 }
