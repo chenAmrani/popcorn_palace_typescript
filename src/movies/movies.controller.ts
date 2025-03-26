@@ -6,6 +6,7 @@ import {
   Param,
   Delete,
   Put,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { MoviesService } from './movies.service';
 import { Movie } from './entities/movie.entity';
@@ -22,7 +23,7 @@ export class MoviesController {
   }
 
   @Get('/:id')
-  getMovieById(@Param('id') id: number): Promise<Movie> {
+  getMovieById(@Param('id', ParseIntPipe) id: number): Promise<Movie> {
     return this.moviesService.getMovieById(id);
   }
 
@@ -41,7 +42,7 @@ export class MoviesController {
 
   @Put('/update/id/:id')
   updateMovieById(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updatedData: UpdateMovieDto,
   ): Promise<Movie> {
     return this.moviesService.updateMovieById(id, updatedData);

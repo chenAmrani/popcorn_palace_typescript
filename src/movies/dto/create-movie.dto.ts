@@ -10,7 +10,7 @@ import {
   IsValidGenre,
   IsValidReleaseYear,
   NoLeadingSpace,
-} from '../validators/release-year.validator';
+} from '../validators/movie.validator';
 
 export class CreateMovieDto {
   @IsNotEmpty({ message: 'Title is required.' })
@@ -32,7 +32,7 @@ export class CreateMovieDto {
   @IsNotEmpty({ message: 'Rating is required.' })
   @IsNumber({}, { message: 'Rating must be a number.' })
   @Min(0, { message: 'Rating must be at least 0.' })
-  @Max(10, { message: 'Rating cannot exceed 10.' })
+  @Max(10, { message: 'rating must not be greater than 10.' })
   rating: number;
 
   @IsNotEmpty({ message: 'Release year is required.' })

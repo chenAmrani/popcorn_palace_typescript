@@ -47,13 +47,17 @@ describe('MoviesController (e2e)', () => {
 
   afterAll(async () => {
     for (const id of movieIds) {
-      await request(app.getHttpServer()).delete(`/movies/id/${id}`).expect(200);
+      await request(app.getHttpServer())
+        .delete(`/movies/id/${id}`)
+        .expect((res) => {
+          expect([200, 404]).toContain(res.status);
+        });
     }
 
     await app.close();
   });
 
-  it.skip('/movies (POST) - Attempt to create a movie without release year', async () => {
+  it('/movies (POST) - Attempt to create a movie without release year', async () => {
     const futureYearMovie = {
       title: Math.random().toString(),
       genre: 'Sci-Fi',
@@ -66,13 +70,11 @@ describe('MoviesController (e2e)', () => {
       .send(futureYearMovie)
       .expect(400)
       .expect((res) => {
-        expect(res.body.message).toContain(
-          'null value in column "release_year" of relation "movies" violates not-null constraint',
-        );
+        expect(res.body.message).toContain('Release year is required.');
       });
   });
 
-  it.skip('/movies (GET) - Return all movies', () => {
+  it('/movies (GET) - Return all movies', () => {
     return request(app.getHttpServer())
       .get('/movies/all')
       .expect(200)
@@ -82,7 +84,7 @@ describe('MoviesController (e2e)', () => {
       });
   });
 
-  it.skip('/movies/:id (GET) - Return a specific movie by ID', async () => {
+  it('/movies/:id (GET) - Return a specific movie by ID', async () => {
     return request(app.getHttpServer())
       .get(`/movies/${movie2Id}`)
       .expect(200)
@@ -92,7 +94,7 @@ describe('MoviesController (e2e)', () => {
       });
   });
 
-  it.skip('/movies/:title (DELETE) - Delete a movie by Title', async () => {
+  it('/movies/:title (DELETE) - Delete a movie by Title', async () => {
     const res = await request(app.getHttpServer())
       .delete(`/movies/${movie1Title}`)
       .expect(200);
@@ -102,7 +104,7 @@ describe('MoviesController (e2e)', () => {
     });
   });
 
-  it.skip('/movies/id/:id (DELETE) - Delete a movie by ID', async () => {
+  it('/movies/id/:id (DELETE) - Delete a movie by ID', async () => {
     const res = await request(app.getHttpServer())
       .delete(`/movies/id/${movie2Id}`)
       .expect(200);
@@ -112,7 +114,7 @@ describe('MoviesController (e2e)', () => {
     });
   });
 
-  it.skip('/movies/id/:id (DELETE) - Attempt to delete non-existent movie', async () => {
+  it('/movies/id/:id (DELETE) - Attempt to delete non-existent movie', async () => {
     await request(app.getHttpServer())
       .delete(`/movies/id/9999`)
       .expect(404)
@@ -123,7 +125,7 @@ describe('MoviesController (e2e)', () => {
       });
   });
 
-  it.only('/movies (POST) - Attempt to create a movie with future release year', async () => {
+  it('/movies (POST) - Attempt to create a movie with future release year', async () => {
     const futureYearMovie = {
       title: Math.random().toString(),
       genre: 'Sci-Fi2',
@@ -165,7 +167,176 @@ describe('MoviesController (e2e)', () => {
       .expect((res) => {
         console.log('Error Response:', res.body);
         expect(res.body.message).toContain(
-          `Movie with title "${duplicateMovie.title}" already exists.`,
+          `Movie "${duplicateMovie.title}" (${duplicateMovie.release_year}) already exists.`,
+        );
+      });
+  });
+
+  it('/movies/:id (GET) - Non-existent movie ID returns 404', async () => {
+    await request(app.getHttpServer())
+      .get('/movies/999999')
+      .expect(404)
+      .expect((res) => {
+        expect(res.body.message).toBe('Movie with ID "999999" not found.');
+      });
+  });
+
+  it('/movies/update/:title (PUT) - Update movie by title', async () => {
+    const movie = {
+      title: 'UpdateTitleMovie',
+      genre: 'Horror',
+      duration: 90,
+      rating: 3.5,
+      release_year: 2020,
+    };
+
+    await request(app.getHttpServer()).post('/movies').send(movie).expect(201);
+
+    await request(app.getHttpServer())
+      .put(`/movies/update/${movie.title}`)
+      .send({ rating: 4.7 })
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.rating).toBe(4.7);
+      });
+  });
+
+  it('/movies/update/id/:id (PUT) - Update movie by ID', async () => {
+    const movie = {
+      title: 'UpdateIdMovie',
+      genre: 'Comedy',
+      duration: 100,
+      rating: 4.0,
+      release_year: 2019,
+    };
+
+    const res = await request(app.getHttpServer())
+      .post('/movies')
+      .send(movie)
+      .expect(201);
+
+    const id = res.body.id;
+
+    await request(app.getHttpServer())
+      .put(`/movies/update/id/${id}`)
+      .send({ genre: 'Romance' })
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.genre).toBe('Romance');
+      });
+  });
+
+  it('/movies/update/:title (PUT) - Attempt to update non-existent movie by title', async () => {
+    await request(app.getHttpServer())
+      .put('/movies/update/NonExistentTitle')
+      .send({ genre: 'Sci-Fi' })
+      .expect(404)
+      .expect((res) => {
+        expect(res.body.message).toBe(
+          'Movie with title "NonExistentTitle" not found.',
+        );
+      });
+  });
+
+  it('/movies/update/id/:id (PUT) - Attempt to update non-existent movie by ID', async () => {
+    await request(app.getHttpServer())
+      .put('/movies/update/id/999999')
+      .send({
+        title: 'Inception',
+        genre: 'Drama',
+        duration: 148,
+        rating: 8.8,
+        release_year: 2010,
+      })
+      .expect(404)
+      .expect((res) => {
+        expect(res.body.message).toBe('Movie with ID "999999" not found.');
+      });
+  });
+
+  it('/movies/update/id/:id (PUT) - Attempt to update movie title to a duplicate', async () => {
+    const movieA = await request(app.getHttpServer())
+      .post('/movies')
+      .send({
+        title: 'OriginalTitleA',
+        genre: 'Action',
+        duration: 100,
+        rating: 4,
+        release_year: 2022,
+      })
+      .expect(201);
+
+    const movieB = await request(app.getHttpServer())
+      .post('/movies')
+      .send({
+        title: 'OriginalTitleB',
+        genre: 'Thriller',
+        duration: 110,
+        rating: 3.9,
+        release_year: 2022,
+      })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .put(`/movies/update/id/${movieB.body.id}`)
+      .send({ title: 'OriginalTitleA' })
+      .expect(400)
+      .expect((res) => {
+        expect(res.body.message).toContain(
+          `Movie "OriginalTitleA" (2022) already exists.`,
+        );
+      });
+  });
+
+  it('/movies (POST) - Attempt to create movie without title', async () => {
+    await request(app.getHttpServer())
+      .post('/movies')
+      .send({
+        genre: 'Drama',
+        duration: 90,
+        rating: 4.2,
+        release_year: 2021,
+      })
+      .expect(400)
+      .expect((res) => {
+        expect(
+          res.body.message.some((msg) => msg.includes('Title is required')),
+        ).toBe(true);
+      });
+  });
+
+  it('/movies (POST) - Attempt to create movie with invalid rating', async () => {
+    await request(app.getHttpServer())
+      .post('/movies')
+      .send({
+        title: 'InvalidRatingMovie',
+        genre: 'Sci-Fi',
+        duration: 100,
+        rating: 11,
+        release_year: 2023,
+      })
+      .expect(400)
+      .expect((res) => {
+        expect(res.body.message).toContain(
+          'rating must not be greater than 10.',
+        );
+      });
+  });
+
+  it('/movies (POST) - Attempt to create movie with negative duration', async () => {
+    await request(app.getHttpServer())
+      .post('/movies')
+      .send({
+        title: 'NegativeDurationMovie',
+        genre: 'Mystery',
+        duration: -90,
+        rating: 3.8,
+        release_year: 2023,
+      })
+      .expect(400)
+      .expect((res) => {
+        expect(res.body.message).toContain(
+          'Duration must be at least 1 minute.',
         );
       });
   });

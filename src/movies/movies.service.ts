@@ -77,22 +77,24 @@ export class MoviesService {
     id: number,
     updatedData: UpdateMovieDto,
   ): Promise<Movie> {
-    const numericId = Number(id);
-
-    if (isNaN(numericId)) {
-      throw new BadRequestException(`Invalid ID provided: "${id}"`);
-    }
-
-    const movie = await this.movieRepository.findOne({
-      where: { id: numericId },
-    });
+    const movie = await this.movieRepository.findOne({ where: { id } });
 
     if (!movie) {
       throw new NotFoundException(`Movie with ID "${id}" not found.`);
     }
 
     Object.assign(movie, updatedData);
-    return await this.movieRepository.save(movie);
+
+    try {
+      return await this.movieRepository.save(movie);
+    } catch (error) {
+      if (error.code === '23505') {
+        throw new BadRequestException(
+          `Movie "${updatedData.title}" (${movie.release_year}) already exists.`,
+        );
+      }
+      throw error;
+    }
   }
 
   async deleteMovieByTitle(title: string): Promise<{ message: string }> {
@@ -107,10 +109,6 @@ export class MoviesService {
 
   async deleteMovieById(id: number): Promise<{ message: string }> {
     const numericId = Number(id);
-
-    if (isNaN(numericId)) {
-      throw new BadRequestException(`Invalid ID provided: "${id}"`);
-    }
 
     const result = await this.movieRepository.delete({ id: numericId });
 
