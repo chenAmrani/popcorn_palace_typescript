@@ -98,13 +98,11 @@ export class ShowtimesService {
         this.showtimeRepository,
       );
 
-      console.log(`Looking for movie with ID: ${movieId}`);
       const movie = await this.movieRepository.findOne({
         where: { id: movieId },
       });
 
       if (!movie) {
-        console.log(`Movie with ID ${movieId} not found.`);
         throw new NotFoundException(`Movie with ID ${movieId} not found.`);
       }
 

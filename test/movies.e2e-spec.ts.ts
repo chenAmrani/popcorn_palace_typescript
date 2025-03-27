@@ -131,9 +131,7 @@ describe('MoviesController (e2e)', () => {
     await request(app.getHttpServer())
       .post('/movies')
       .send(futureYearMovie)
-      // .expect(400)
       .expect((res) => {
-        console.log('res.body', res.body);
         expect(res.body.message).toContain(
           'Release year cannot be in the future.',
         );
@@ -159,7 +157,6 @@ describe('MoviesController (e2e)', () => {
       .send(duplicateMovie)
       .expect(400)
       .expect((res) => {
-        console.log('Error Response:', res.body);
         expect(res.body.message).toContain(
           `Movie "${duplicateMovie.title}" (${duplicateMovie.release_year}) already exists.`,
         );

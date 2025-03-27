@@ -34,7 +34,6 @@ describe('BookingsController (e2e)', () => {
       .send(moviePayload);
 
     if (movieRes.status !== 201) {
-      console.error('Movie creation failed:', movieRes.body);
       throw new Error('Movie creation failed');
     }
 
@@ -53,7 +52,6 @@ describe('BookingsController (e2e)', () => {
       .send(showtimePayload);
 
     if (showtimeRes.status !== 201) {
-      console.error('Showtime creation failed:', showtimeRes.body);
       throw new Error('Showtime creation failed');
     }
 
@@ -193,9 +191,8 @@ describe('BookingsController (e2e)', () => {
         start_time: '2025-03-27T18:00:00.000Z',
         end_time: '2025-03-27T19:36:00.000Z',
         price: 40,
-      });
-    console.log('@@@@@@@showtimeRes:', showtimeRes.body);
-    expect(201);
+      })
+      .expect(201);
 
     const showtimeId = showtimeRes.body.id;
 
