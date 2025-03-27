@@ -3,7 +3,6 @@ import { AppModule } from '../src/app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { INestApplication } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-process.env.NODE_ENV = 'test';
 
 export async function clearDatabase(app: INestApplication) {
   const dataSource = app.get(DataSource);
