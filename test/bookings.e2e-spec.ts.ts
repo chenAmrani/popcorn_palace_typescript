@@ -7,9 +7,8 @@ describe('BookingsController (e2e)', () => {
 
   beforeAll(async () => {
     app = await createTestApp();
-    await app.init();
     await clearDatabase(app);
-    console.log('NODE_ENV:', process.env.NODE_ENV);
+    await app.init();
   });
 
   afterEach(async () => {

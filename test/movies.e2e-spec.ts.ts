@@ -47,14 +47,7 @@ describe('MoviesController (e2e)', () => {
   });
 
   afterAll(async () => {
-    for (const id of movieIds) {
-      await request(app.getHttpServer())
-        .delete(`/movies/id/${id}`)
-        .expect((res) => {
-          expect([200, 404]).toContain(res.status);
-        });
-    }
-
+    app = await createTestApp();
     await app.close();
   });
 

@@ -32,10 +32,7 @@ describe('ShowtimesController (e2e)', () => {
   });
 
   afterAll(async () => {
-    await request(app.getHttpServer()).delete(`/movies/${movieIdTest}`);
-    await request(app.getHttpServer()).delete(
-      `/showtimes/${createdShowtimeId}`,
-    );
+    app = await createTestApp();
     await app.close();
   });
 
@@ -83,11 +80,9 @@ describe('ShowtimesController (e2e)', () => {
         end_time: '2025-06-01T12:00:00.000Z',
         price: 50,
       })
-      .expect(400)
+      .expect(404)
       .expect((res) => {
-        expect(res.body.message).toContain(
-          'Movie with ID 9999 does not exist.',
-        );
+        expect(res.body.message).toContain('Movie with ID 9999 not found.');
       });
   });
 
