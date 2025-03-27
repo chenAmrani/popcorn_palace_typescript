@@ -131,6 +131,7 @@ describe('MoviesController (e2e)', () => {
     await request(app.getHttpServer())
       .post('/movies')
       .send(futureYearMovie)
+      .expect(400)
       .expect((res) => {
         expect(res.body.message).toContain(
           'Release year cannot be in the future.',
@@ -279,6 +280,24 @@ describe('MoviesController (e2e)', () => {
       });
   });
 
+  it('/movies (POST) - should fail if title starts with space', async () => {
+    await request(app.getHttpServer())
+      .post('/movies')
+      .send({
+        title: ' Leading Space Title',
+        genre: 'Action',
+        duration: 90,
+        rating: 6,
+        release_year: 2022,
+      })
+      .expect(400)
+      .expect((res) => {
+        expect(res.body.message).toContain(
+          'Title must not start with a space.',
+        );
+      });
+  });
+
   it('/movies (POST) - Attempt to create movie without title', async () => {
     await request(app.getHttpServer())
       .post('/movies')
@@ -310,6 +329,24 @@ describe('MoviesController (e2e)', () => {
       .expect((res) => {
         expect(res.body.message).toContain(
           'rating must not be greater than 10.',
+        );
+      });
+  });
+
+  it('/movies (POST) - should fail if genre is invalid', async () => {
+    await request(app.getHttpServer())
+      .post('/movies')
+      .send({
+        title: 'Invalid Genre Movie',
+        genre: 'InvalidGenre',
+        duration: 120,
+        rating: 7,
+        release_year: 2022,
+      })
+      .expect(400)
+      .expect((res) => {
+        expect(res.body.message).toContain(
+          'Genre must be one of the allowed types.',
         );
       });
   });

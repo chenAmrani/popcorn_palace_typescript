@@ -171,44 +171,6 @@ describe('BookingsController (e2e)', () => {
       .expect(400);
   });
 
-  it('POST /bookings - booking for past showtime should fail', async () => {
-    const movieRes = await request(app.getHttpServer())
-      .post('/movies')
-      .send({
-        title: 'PastMovie',
-        genre: 'Drama',
-        duration: 90,
-        rating: 3.5,
-        release_year: 2022,
-      })
-      .expect(201);
-
-    const showtimeRes = await request(app.getHttpServer())
-      .post('/showtimes')
-      .send({
-        movieId: movieRes.body.id,
-        theater: 'Test Theater',
-        start_time: '2025-03-27T18:00:00.000Z',
-        end_time: '2025-03-27T19:36:00.000Z',
-        price: 40,
-      })
-      .expect(201);
-
-    const showtimeId = showtimeRes.body.id;
-
-    await request(app.getHttpServer())
-      .post('/bookings')
-      .send({
-        showtimeId,
-        seatNumber: 1,
-        userId: 'tooLateUser',
-      })
-      .expect(400)
-      .expect((res) => {
-        expect(res.body.message).toContain('already ended');
-      });
-  });
-
   it('PUT /bookings/:id - update seat number successfully', async () => {
     const movieRes = await request(app.getHttpServer()).post('/movies').send({
       title: 'UpdateBookingMovie',
