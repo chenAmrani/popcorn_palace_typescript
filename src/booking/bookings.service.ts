@@ -8,6 +8,7 @@ import { Repository, DeleteResult } from 'typeorm';
 import { Booking } from './entities/booking.entity';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { Showtime } from '../showtimes/entities/showtime.entity';
+import { UpdateBookingDto } from './dto/update-booking.dto';
 
 const MAX_SEATS = 100;
 
@@ -61,6 +62,17 @@ export class BookingsService {
     }
 
     return booking;
+  }
+
+  async updateBooking(id: number, updatedData: UpdateBookingDto) {
+    const booking = await this.bookingRepository.findOne({ where: { id } });
+
+    if (!booking) {
+      throw new Error(`Booking with ID ${id} not found.`);
+    }
+
+    Object.assign(booking, updatedData);
+    return this.bookingRepository.save(booking);
   }
 
   async deleteBooking(id: number): Promise<DeleteResult> {

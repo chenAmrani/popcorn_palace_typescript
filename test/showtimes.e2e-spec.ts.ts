@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
+import { createTestApp, clearDatabase } from './setup';
 
 describe('ShowtimesController (e2e)', () => {
   let app: INestApplication;
@@ -9,6 +10,8 @@ describe('ShowtimesController (e2e)', () => {
   let movieIdTest: number;
 
   beforeAll(async () => {
+    app = await createTestApp();
+    await clearDatabase(app);
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -106,10 +109,34 @@ describe('ShowtimesController (e2e)', () => {
   });
 
   it('POST /showtimes - exact overlapping time on same theater => should fail', async () => {
+    const movieRes = await request(app.getHttpServer())
+      .post('/movies')
+      .send({
+        title: 'OverlapMovie',
+        genre: 'Drama',
+        duration: 120,
+        rating: 4.3,
+        release_year: 2024,
+      })
+      .expect(201);
+
+    const movieId = movieRes.body.id;
+
     await request(app.getHttpServer())
       .post('/showtimes')
       .send({
-        movieId: movieIdTest,
+        movieId,
+        theater: 'Cinema City',
+        start_time: '2025-08-01T19:00:00.000Z',
+        end_time: '2025-08-01T21:00:00.000Z',
+        price: 60,
+      })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post('/showtimes')
+      .send({
+        movieId,
         theater: 'Cinema City',
         start_time: '2025-08-01T19:00:00.000Z',
         end_time: '2025-08-01T21:00:00.000Z',
@@ -118,6 +145,12 @@ describe('ShowtimesController (e2e)', () => {
       .expect(400)
       .expect((res) => {
         expect(res.body.message).toContain('overlaps with the selected time');
+      });
+
+    await request(app.getHttpServer())
+      .delete(`/movies/id/${movieId}`)
+      .expect((res) => {
+        expect([200, 404]).toContain(res.status);
       });
   });
 
@@ -138,8 +171,45 @@ describe('ShowtimesController (e2e)', () => {
   });
 
   it('PUT /showtimes/update/:id - attempt to update into overlapping time => should fail', async () => {
+    const movieRes = await request(app.getHttpServer())
+      .post('/movies')
+      .send({
+        title: 'UpdateOverlapMovie',
+        genre: 'Drama',
+        duration: 110,
+        rating: 4.1,
+        release_year: 2023,
+      })
+      .expect(201);
+
+    const movieId = movieRes.body.id;
+
     await request(app.getHttpServer())
-      .put(`/showtimes/update/${createdShowtimeId}`)
+      .post('/showtimes')
+      .send({
+        movieId,
+        theater: 'Cinema City',
+        start_time: '2025-08-01T18:00:00.000Z',
+        end_time: '2025-08-01T20:00:00.000Z',
+        price: 50,
+      })
+      .expect(201);
+
+    const secondShowtime = await request(app.getHttpServer())
+      .post('/showtimes')
+      .send({
+        movieId,
+        theater: 'Cinema City',
+        start_time: '2025-08-01T20:30:00.000Z',
+        end_time: '2025-08-01T22:00:00.000Z',
+        price: 55,
+      })
+      .expect(201);
+
+    const secondShowtimeId = secondShowtime.body.id;
+
+    await request(app.getHttpServer())
+      .put(`/showtimes/update/${secondShowtimeId}`)
       .send({
         start_time: '2025-08-01T19:00:00.000Z',
         end_time: '2025-08-01T21:00:00.000Z',
@@ -147,6 +217,12 @@ describe('ShowtimesController (e2e)', () => {
       .expect(400)
       .expect((res) => {
         expect(res.body.message).toContain('overlaps with the selected time');
+      });
+
+    await request(app.getHttpServer())
+      .delete(`/movies/id/${movieId}`)
+      .expect((res) => {
+        expect([200, 404]).toContain(res.status);
       });
   });
 

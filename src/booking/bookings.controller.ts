@@ -6,6 +6,9 @@ import {
   Param,
   Delete,
   BadRequestException,
+  ParseIntPipe,
+  Put,
+  NotFoundException,
 } from '@nestjs/common';
 import { BookingsService } from './bookings.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
@@ -16,6 +19,7 @@ import {
   validateShowtimeExists,
   validateBookingBeforeShowtimeEnds,
 } from './validators/booking.validator';
+import { UpdateBookingDto } from './dto/update-booking.dto';
 
 @Controller('bookings')
 export class BookingsController {
@@ -55,10 +59,24 @@ export class BookingsController {
     const booking = await this.bookingsService.getBookingById(id);
 
     if (!booking) {
-      throw new BadRequestException(`Booking with ID ${id} not found.`);
+      throw new NotFoundException(`Booking with ID ${id} not found.`);
     }
 
     return booking;
+  }
+
+  @Put(':id')
+  async updateBooking(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updatedData: UpdateBookingDto,
+  ) {
+    const booking = await this.bookingsService.getBookingById(id);
+
+    if (!booking) {
+      throw new NotFoundException(`Booking with ID ${id} not found.`);
+    }
+
+    return this.bookingsService.updateBooking(id, updatedData);
   }
 
   @Delete(':id')

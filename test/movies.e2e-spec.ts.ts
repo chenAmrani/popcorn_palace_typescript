@@ -1,6 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { createTestApp } from './setup';
+import { clearDatabase, createTestApp } from './setup';
 
 describe('MoviesController (e2e)', () => {
   let app: INestApplication;
@@ -27,6 +27,7 @@ describe('MoviesController (e2e)', () => {
 
   beforeAll(async () => {
     app = await createTestApp();
+    await clearDatabase(app);
     await app.init();
 
     const res1 = await request(app.getHttpServer())

@@ -91,19 +91,21 @@ export class ShowtimesService {
 
     validateStartTimeInFuture(startTime);
     validateEndTimeAfterStartTime(startTime, endTime);
+
     try {
       await validateNoOverlappingShowtimes(
         showtimeData,
         this.showtimeRepository,
       );
 
+      console.log(`Looking for movie with ID: ${movieId}`);
       const movie = await this.movieRepository.findOne({
         where: { id: movieId },
       });
+
       if (!movie) {
-        throw new BadRequestException(
-          `Movie with ID ${movieId} does not exist.`,
-        );
+        console.log(`Movie with ID ${movieId} not found.`);
+        throw new NotFoundException(`Movie with ID ${movieId} not found.`);
       }
 
       const newShowtime = this.showtimeRepository.create({
@@ -115,7 +117,10 @@ export class ShowtimesService {
 
       return this.showtimeRepository.save(newShowtime);
     } catch (error) {
-      if (error instanceof BadRequestException) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
         throw error;
       }
       throw new InternalServerErrorException('An unexpected error occurred.');
@@ -128,7 +133,7 @@ export class ShowtimesService {
   ): Promise<Showtime> {
     const showtime = await this.getShowtimeById(id);
 
-    const startTime = updatedData.start_time
+    const start_time = updatedData.start_time
       ? new Date(updatedData.start_time)
       : showtime.start_time;
     const endTime = updatedData.end_time
@@ -140,19 +145,19 @@ export class ShowtimesService {
     }
 
     if (updatedData.start_time || updatedData.end_time) {
-      if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
+      if (isNaN(start_time.getTime()) || isNaN(endTime.getTime())) {
         throw new BadRequestException(
           'start_time or end_time is not a valid ISO date.',
         );
       }
-      validateStartTimeInFuture(startTime);
-      validateEndTimeAfterStartTime(startTime, endTime);
 
+      validateStartTimeInFuture(start_time);
+      validateEndTimeAfterStartTime(start_time, endTime);
       await validateNoOverlappingShowtimes(
         {
           ...showtime,
           ...updatedData,
-          start_time: startTime,
+          start_time: start_time,
           end_time: endTime,
         },
         this.showtimeRepository,
@@ -164,15 +169,13 @@ export class ShowtimesService {
         where: { id: updatedData.movieId },
       });
       if (!movie) {
-        throw new BadRequestException(
-          `Movie with ID ${updatedData.movieId} does not exist.`,
-        );
+        throw new NotFoundException(`Movie with ID ${movie.id} not found.`);
       }
       showtime.movie = movie;
     }
 
     Object.assign(showtime, updatedData, {
-      start_time: startTime,
+      start_time: start_time,
       end_time: endTime,
     });
 

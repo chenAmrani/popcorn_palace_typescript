@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Booking } from '../entities/booking.entity';
 
@@ -39,7 +39,7 @@ export const validateShowtimeExists = async (
   });
 
   if (!showtime) {
-    throw new BadRequestException(
+    throw new NotFoundException(
       `Showtime with ID ${showtimeId} does not exist.`,
     );
   }
