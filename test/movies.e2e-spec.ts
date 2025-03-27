@@ -249,7 +249,7 @@ describe('MoviesController (e2e)', () => {
   });
 
   it('/movies/update/id/:id (PUT) - Attempt to update movie title to a duplicate', async () => {
-    const movieA = await request(app.getHttpServer())
+    await request(app.getHttpServer())
       .post('/movies')
       .send({
         title: 'OriginalTitleA',
