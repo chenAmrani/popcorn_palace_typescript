@@ -56,24 +56,15 @@ The system is built using NestJS, a progressive Node.js framework for building e
 
 ### Showtimes APIs
 
-<<<<<<< HEAD
-| API Description | Endpoint | Request Body | Response Status | Response Body |
-| ------------------ | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | ------------------- | ------------------------ | --- | -------------- | --- |
-| Get showtime by ID | GET /showtimes/{showtimeId} | | 200 OK | { "id": 1, "price":50.2, "movieId": 1, "theater": "Sample Theater", "startTime": "2025-02-14T11:47:46.125405Z", "endTime": "2025-02-14T14:47:46.125405Z" } | | Delete a restaurant | DELETE /restaurants/{id} | | 204 No Content | |
-| Add a showtime | POST /showtimes | { "movieId": 1, "price":20.2, "theater": "Sample Theater", "startTime": "2025-02-14T11:47:46.125405Z", "endTime": "2025-02-14T14:47:46.125405Z" } | 200 OK | { "id": 1, "price":50.2,"movieId": 1, "theater": "Sample Theater", "startTime": "2025-02-14T11:47:46.125405Z", "endTime": "2025-02-14T14:47:46.125405Z" } |
-| Update a showtime | POST /showtimes/update/{showtimeId} | { "movieId": 1, "price":50.2, "theater": "Sample Theater", "startTime": "2025-02-14T11:47:46.125405Z", "endTime": "2025-02-14T14:47:46.125405Z" } | 200 OK | |
-| Delete a showtime | DELETE /showtimes/{showtimeId} | | 200 OK | |
-=======
-| API Description | Endpoint | Request Body | Response Status | Response Body |
+| API Description                 | Endpoint                        | Request Body                                                                                              | Response Status | Response Body                                                                                                                                                           |
 | ------------------------------ | ------------------------------- | --------------------------------------------------------------------------------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Get all showtimes | GET /showtimes/all | | 200 OK | [ { id, theater, start_time, end_time, price, movieId } ] |
-| Get showtime by ID | GET /showtimes/{showtimeId} | | 200 OK | { id, theater, start_time, end_time, price, movieId } |
-| Get showtimes with booking data| GET /showtimes/bookings | | 200 OK | [ { id, theater, start_time, end_time, price, movie_title, ticketsSold } ] |
-| Add a showtime | POST /showtimes | { "movieId": 1, "theater": "Sample Theater", "start_time": "...", "end_time": "...", "price": 50 } | 201 CREATED | { id, theater, start_time, end_time, price, movie } |
-| Update a showtime | PUT /showtimes/update/{id} | { "movieId"?: number, "theater"?: string, "start_time"?: string, "end_time"?: string, "price"?: number } | 200 OK | { id, theater, start_time, end_time, price, movie } |
-| Delete a showtime | DELETE /showtimes/{id} | | 200 OK | { "message": "Showtime with ID {id} was deleted successfully." } |
+| Get all showtimes              | GET /showtimes/all              |                                                                                                           | 200 OK          | [ { id, theater, start_time, end_time, price, movieId } ]                                                                                                               |
+| Get showtime by ID             | GET /showtimes/{showtimeId}     |                                                                                                           | 200 OK          | { id, theater, start_time, end_time, price, movieId }                                                                                                                   |
+| Get showtimes with booking data| GET /showtimes/bookings         |                                                                                                           | 200 OK          | [ { id, theater, start_time, end_time, price, movie_title, ticketsSold } ]                                                                                              |
+| Add a showtime                 | POST /showtimes                 | { "movieId": 1, "theater": "Sample Theater", "start_time": "...", "end_time": "...", "price": 50 }        | 201 CREATED     | { id, theater, start_time, end_time, price, movie }                                                                                                                     |
+| Update a showtime              | PUT /showtimes/update/{id}      | { "movieId"?: number, "theater"?: string, "start_time"?: string, "end_time"?: string, "price"?: number }  | 200 OK          | { id, theater, start_time, end_time, price, movie }                                                                                                                     |
+| Delete a showtime              | DELETE /showtimes/{id}          |                                                                                                           | 200 OK          | { "message": "Showtime with ID {id} was deleted successfully." }                                                                                                        |
 
-> > > > > > > 3192bbc42b47d0197e23142604ddbc72172e88ae
 
 ### Bookings APIs
 
