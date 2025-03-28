@@ -65,10 +65,23 @@ describe('ShowtimesService', () => {
     expect(result).toEqual([mockShowtime]);
   });
 
+  it('should return empty array if no showtimes are found', async () => {
+    showtimeRepo.find.mockResolvedValue([]);
+    const result = await service.getAllShowtimes();
+    expect(result).toEqual([]);
+  });
+
   it('should get showtime by ID', async () => {
     showtimeRepo.findOne.mockResolvedValue(mockShowtime as Showtime);
     const result = await service.getShowtimeById(1);
     expect(result).toEqual(mockShowtime);
+  });
+
+  it('should throw NotFoundException when showtime is not found', async () => {
+    showtimeRepo.findOne.mockResolvedValue(null);
+    await expect(service.getShowtimeById(999)).rejects.toThrow(
+      NotFoundException,
+    );
   });
 
   it('should throw if showtime not found', async () => {
@@ -80,6 +93,13 @@ describe('ShowtimesService', () => {
     showtimeRepo.delete.mockResolvedValue({ affected: 1, raw: [] });
     const result = await service.deleteShowtime(1);
     expect(result.message).toContain('deleted successfully');
+  });
+
+  it('should throw NotFoundException if showtime is not found for deletion', async () => {
+    showtimeRepo.delete.mockResolvedValue({ affected: 0, raw: [] });
+    await expect(service.deleteShowtime(999)).rejects.toThrow(
+      NotFoundException,
+    );
   });
 
   it('should throw on delete if not found', async () => {
@@ -118,6 +138,30 @@ describe('ShowtimesService', () => {
     ).rejects.toThrow(BadRequestException);
   });
 
+  it('should throw BadRequestException when start_time or end_time is invalid', async () => {
+    await expect(
+      service.addShowtime({
+        theater: 'A',
+        movieId: 1,
+        price: 25,
+        start_time: new Date('invalid-date'),
+        end_time: new Date('invalid-date'),
+      }),
+    ).rejects.toThrow(BadRequestException);
+  });
+  it('should throw BadRequestException if movie not found', async () => {
+    movieRepo.findOne.mockResolvedValue(null);
+    await expect(
+      service.addShowtime({
+        theater: 'A',
+        movieId: 999,
+        price: 25,
+        start_time: new Date('2025-12-01T10:00:00Z'),
+        end_time: new Date('2025-12-01T12:00:00Z'),
+      }),
+    ).rejects.toThrow(NotFoundException);
+  });
+
   it('should update showtime successfully', async () => {
     const updateDto: UpdateShowtimeDto = { price: 100 };
     jest.spyOn(validator, 'validateStartTimeInFuture').mockImplementation();
@@ -131,5 +175,19 @@ describe('ShowtimesService', () => {
 
     const result = await service.updateShowtime(1, updateDto);
     expect(result.price).toBe(100);
+  });
+  it('should throw NotFoundException when showtime to update does not exist', async () => {
+    showtimeRepo.findOne.mockResolvedValue(null);
+    await expect(service.updateShowtime(999, { price: 50 })).rejects.toThrow(
+      NotFoundException,
+    );
+  });
+
+  it('should throw BadRequestException if price is invalid during update', async () => {
+    const updateDto: UpdateShowtimeDto = { price: -1 };
+    showtimeRepo.findOne.mockResolvedValue(mockShowtime as Showtime);
+    await expect(service.updateShowtime(1, updateDto)).rejects.toThrow(
+      BadRequestException,
+    );
   });
 });
