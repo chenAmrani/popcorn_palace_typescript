@@ -54,7 +54,7 @@ export class BookingsController {
     return this.bookingsService.getAllBookings();
   }
 
-  @Get(':id')
+  @Get('/:id')
   async getBookingById(@Param('id') id: number) {
     const booking = await this.bookingsService.getBookingById(id);
 
@@ -65,7 +65,7 @@ export class BookingsController {
     return booking;
   }
 
-  @Put(':id')
+  @Put('/:id')
   async updateBooking(
     @Param('id', ParseIntPipe) id: number,
     @Body() updatedData: UpdateBookingDto,
@@ -79,7 +79,7 @@ export class BookingsController {
     return this.bookingsService.updateBooking(id, updatedData);
   }
 
-  @Delete(':id')
+  @Delete('/:id')
   async deleteBooking(@Param('id') id: number) {
     const result = await this.bookingsService.deleteBooking(id);
 
