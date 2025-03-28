@@ -6,6 +6,5 @@
     "^.+\\.(t|j)s$": "ts-jest"
   },
   "coverageDirectory": "./test/coverage",
-  "testEnvironment": "node",
-  "collectCoverage": true
+  "testEnvironment": "node"
 }
