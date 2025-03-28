@@ -70,7 +70,7 @@ describe('MoviesController (e2e)', () => {
 
   it('/movies (GET) - Return all movies', () => {
     return request(app.getHttpServer())
-      .get('/movies/all')
+      .get('/movies')
       .expect(200)
       .expect((res) => {
         expect(Array.isArray(res.body)).toBe(true);
