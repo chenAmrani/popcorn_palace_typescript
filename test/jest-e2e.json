@@ -7,12 +7,5 @@
   },
   "coverageDirectory": "./test/coverage",
   "testEnvironment": "node",
-  "collectCoverage": true,
-  "collectCoverageFrom": [
-    "src/**/*.ts",
-    "!src/main.ts",
-    "!src/**/*.module.ts",
-    "!src/**/entities/*.ts",
-    "!src/**/dto/*.ts"
-  ]
+  "collectCoverage": true
 }
