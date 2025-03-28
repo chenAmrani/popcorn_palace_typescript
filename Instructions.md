@@ -1,18 +1,15 @@
-# Prerequisites
-Before running the project, make sure the following tools are installed on your machine:
+## Prerequisites
 
-✅ If running the project without Docker (locally):
-Node.js (v18 or higher)
+Before running the project, ensure the following tools are installed on your machine:
 
-npm – comes bundled with Node.js
+- **Node.js** (v18 or higher)
+- **npm** – npm comes bundled with Node.js
+- **PostgreSQL** – Make sure PostgreSQL is installed and running locally
 
-PostgreSQL – make sure PostgreSQL is installed and running locally
+Additionally, if you are using Docker, make sure to install:
 
-✅ If running the project with Docker:
-Docker – Install Docker Desktop
-
-Docker Compose – included with Docker Desktop
-
+- **Docker** – Install Docker Desktop
+- **Docker Compose** – Included with Docker Desktop
 
 
 ## Install Dependencies
