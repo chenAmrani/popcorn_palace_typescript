@@ -80,49 +80,6 @@ The system is built using NestJS, a progressive Node.js framework for building e
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-## Installation
-
-```bash
-$ npm install
-```
-## Build the app
-```bash
-
-$ npm run build
-```
-
-## Running the app
-
-```bash
-# Build and start the app with Docker Compose
-$ docker-compose up --build
-
-# Start the app (without rebuilding)
-$ docker-compose up
-
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Test
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-$ npm run test:e2e:cov
-```
 
 ## License
 
