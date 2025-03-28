@@ -180,11 +180,15 @@ export class ShowtimesService {
     return this.showtimeRepository.save(showtime);
   }
 
-  async deleteShowtime(id: number): Promise<boolean> {
+  async deleteShowtime(id: number): Promise<{ message: string }> {
     const result = await this.showtimeRepository.delete(id);
+
     if (result.affected === 0) {
       throw new NotFoundException(`Showtime with ID ${id} not found.`);
     }
-    return true;
+
+    return {
+      message: `Showtime with ID ${id} was deleted successfully.`,
+    };
   }
 }
