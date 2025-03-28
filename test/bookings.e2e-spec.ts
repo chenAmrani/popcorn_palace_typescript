@@ -240,7 +240,7 @@ describe('BookingsController (e2e)', () => {
       .expect(200)
       .expect((res) => {
         expect(res.body.message).toBe(
-          `Movie with ID ${movieRes.body.id} was deleted successfully.`,
+          `Movie with ID "${movieRes.body.id}" was deleted successfully.`,
         );
       });
 
