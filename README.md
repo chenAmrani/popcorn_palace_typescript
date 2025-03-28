@@ -40,9 +40,6 @@ The system provides the following APIs:
 
 The system is built using NestJS, a progressive Node.js framework for building efficient and scalable server-side applications. Data persistence is managed using PostgreSQL. The app is containerized with Docker.
 
-## Homework Task
-
-Candidates are expected to design and implement the above APIs, adhering to RESTful principles.
 
 ## APIs
 
