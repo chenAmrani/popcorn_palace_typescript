@@ -47,6 +47,18 @@ npm run start:dev
 
 ---
 
+## Running the app
+
+```bash
+# development
+$ npm run start
+
+# watch mode
+$ npm run start:dev
+```
+
+---
+
 ## Running Tests
 
 ### Unit Tests with Coverage
@@ -84,11 +96,6 @@ npm run format
 
 ---
 
-## Environment Variables
-
-If needed, create a `.env` file based on a `.env.example` file and set values like database connection or custom ports.
-
----
 
 ## Notes
 
@@ -99,4 +106,18 @@ If needed, create a `.env` file based on a `.env.example` file and set values li
 ---
 
 Enjoy building with 🍿 **Popcorn Palace**!
+
+
+## Installation
+
+```bash
+$ npm install
+```
+## Build the app
+```bash
+
+$ npm run build
+```
+
+
 
