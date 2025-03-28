@@ -31,32 +31,34 @@ npm run build
 
 ---
 
-## Run the Application
+## Running the Application with Docker
 
-### With Docker Compose (Recommended)
+### 1. Start the Docker Containers
+
+To start the application and PostgreSQL container using Docker Compose, run the following command:
 
 ```bash
-docker-compose up --build
+docker-compose up
 ```
+### 2. Check if the Containers Are Running
+To check if the containers are up and running, you can use the following command:
 
-### Without Docker (Local Development Mode)
+```bash
+docker ps
+```
+### 3. Connect to PostgreSQL
+To connect to the PostgreSQL container and verify the database connection, run the following command:
 
+```bash
+docker exec -it <container_id> psql -U popcorn-palace -d popcorn-palace
+```
+Replace <container_id> with the actual container ID of your PostgreSQL container, which you can obtain from the docker ps command. This command will allow you to access the PostgreSQL database from within the container and execute SQL queries.
+
+### 4. Run the app locally
+To run the application locally, use the following command:
 ```bash
 npm run start:dev
 ```
-
----
-
-## Running the app
-
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-```
-
 ---
 
 ## Running Tests
@@ -108,16 +110,6 @@ npm run format
 Enjoy building with 🍿 **Popcorn Palace**!
 
 
-## Installation
-
-```bash
-$ npm install
-```
-## Build the app
-```bash
-
-$ npm run build
-```
 
 
 
