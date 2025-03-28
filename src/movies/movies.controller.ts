@@ -17,7 +17,7 @@ import { UpdateMovieDto } from './dto/update-movie.dto';
 export class MoviesController {
   constructor(private readonly moviesService: MoviesService) {}
 
-  @Get('/all')
+  @Get()
   getAllMovies(): Promise<Movie[]> {
     return this.moviesService.getAllMovies();
   }
