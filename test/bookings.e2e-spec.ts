@@ -103,7 +103,9 @@ describe('BookingsController (e2e)', () => {
     const res = await request(app.getHttpServer())
       .delete(`/bookings/${createRes.body.id}`)
       .expect(200);
-    expect(res.body.message).toContain('was deleted successfully');
+    expect(res.body.message).toBe(
+      `Booking with ID ${createRes.body.id} was deleted successfully.`,
+    );
   });
 
   it('DELETE /bookings/:id - not found', async () => {
@@ -235,7 +237,12 @@ describe('BookingsController (e2e)', () => {
 
     await request(app.getHttpServer())
       .delete(`/movies/id/${movieRes.body.id}`)
-      .expect(200);
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.message).toBe(
+          `Movie with ID ${movieRes.body.id} was deleted successfully.`,
+        );
+      });
 
     await request(app.getHttpServer())
       .get(`/showtimes/${showtimeRes.body.id}`)

@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DeleteResult } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Booking } from './entities/booking.entity';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { Showtime } from '../showtimes/entities/showtime.entity';
@@ -75,13 +75,15 @@ export class BookingsService {
     return this.bookingRepository.save(booking);
   }
 
-  async deleteBooking(id: number): Promise<DeleteResult> {
+  async deleteBooking(id: number): Promise<{ message: string }> {
     const result = await this.bookingRepository.delete({ id });
 
     if (result.affected === 0) {
       throw new NotFoundException(`Booking with ID ${id} not found.`);
     }
 
-    return result;
+    return {
+      message: `Booking with ID ${id} was deleted successfully.`,
+    };
   }
 }

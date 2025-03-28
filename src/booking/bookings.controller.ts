@@ -83,7 +83,7 @@ export class BookingsController {
   async deleteBooking(@Param('id') id: number) {
     const result = await this.bookingsService.deleteBooking(id);
 
-    if (!result.affected) {
+    if (!result) {
       throw new BadRequestException(`Booking with ID ${id} does not exist.`);
     }
 
