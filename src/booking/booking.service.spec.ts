@@ -100,6 +100,24 @@ describe('BookingsService', () => {
         service.createBooking({ showtimeId: 1, seatNumber: 10, userId: 'x' }),
       ).rejects.toThrow(BadRequestException);
     });
+
+    it('should throw if seat number is less than 1 or greater than 100', async () => {
+      await expect(
+        service.createBooking({
+          showtimeId: 1,
+          seatNumber: 0,
+          userId: 'userA',
+        }),
+      ).rejects.toThrowError(BadRequestException);
+
+      await expect(
+        service.createBooking({
+          showtimeId: 1,
+          seatNumber: 101,
+          userId: 'userB',
+        }),
+      ).rejects.toThrowError(BadRequestException);
+    });
   });
 
   describe('getAllBookings', () => {
@@ -123,6 +141,13 @@ describe('BookingsService', () => {
         NotFoundException,
       );
     });
+
+    it('should throw if booking with given ID does not exist', async () => {
+      mockBookingRepo.findOne.mockResolvedValue(null);
+      await expect(service.getBookingById(999)).rejects.toThrowError(
+        NotFoundException,
+      );
+    });
   });
 
   describe('updateBooking', () => {
@@ -141,6 +166,13 @@ describe('BookingsService', () => {
         service.updateBooking(1, { seatNumber: 20 }),
       ).rejects.toThrow();
     });
+
+    it('should throw if booking with given ID does not exist when updating', async () => {
+      mockBookingRepo.findOne.mockResolvedValue(null);
+      await expect(
+        service.updateBooking(999, { seatNumber: 5 }),
+      ).rejects.toThrowError(Error);
+    });
   });
 
   describe('deleteBooking', () => {
@@ -153,6 +185,13 @@ describe('BookingsService', () => {
     it('should throw if booking not found', async () => {
       mockBookingRepo.delete.mockResolvedValue({ affected: 0 });
       await expect(service.deleteBooking(1)).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw if booking with given ID does not exist when deleting', async () => {
+      mockBookingRepo.delete.mockResolvedValue({ affected: 0 });
+      await expect(service.deleteBooking(999)).rejects.toThrowError(
+        NotFoundException,
+      );
     });
   });
 });

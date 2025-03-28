@@ -3,8 +3,8 @@ import { Repository } from 'typeorm';
 import { Booking } from '../entities/booking.entity';
 
 export const validateSeatNumber = (seatNumber: number) => {
-  if (!Number.isInteger(seatNumber) || seatNumber <= 0) {
-    throw new BadRequestException('Seat number must be a positive integer.');
+  if (seatNumber < 1 || seatNumber > 100) {
+    throw new BadRequestException(`Seat number must be between 1 and 100.`);
   }
 };
 
