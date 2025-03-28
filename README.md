@@ -94,10 +94,10 @@ $ npm run build
 ## Running the app
 
 ```bash
-## Build and start the app with Docker Compose
+# Build and start the app with Docker Compose
 $ docker-compose up --build
 
-## Start the app (without rebuilding)
+# Start the app (without rebuilding)
 $ docker-compose up
 
 # development
