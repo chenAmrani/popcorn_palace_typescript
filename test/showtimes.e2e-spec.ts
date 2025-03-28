@@ -325,7 +325,9 @@ describe('ShowtimesController (e2e)', () => {
       .delete(`/showtimes/${createdShowtimeId}`)
       .expect(200);
 
-    expect(res.body.message).toContain('was deleted successfully');
+    expect(res.body.message).toBe(
+      `Showtime with ID ${createdShowtimeId} was deleted successfully.`,
+    );
   });
 
   it('GET /showtimes/:id - get deleted showtime returns 404', async () => {
