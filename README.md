@@ -85,10 +85,11 @@ The system is built using NestJS, a progressive Node.js framework for building e
 ```bash
 $ npm install
 ```
-
+## Build the app
 ```bash
-# Build the app
+
 $ npm run build
+```
 
 ## Running the app
 
