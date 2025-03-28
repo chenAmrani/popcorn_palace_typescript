@@ -38,7 +38,7 @@ The system provides the following APIs:
 
 ## Technical Aspects
 
-The system is built using Java Spring Boot, leveraging its robust framework for creating RESTful APIs. Data persistence can be managed using an in-memory database like H2 for simplicity, or a more robust solution like PostgreSQL for production.
+The system is built using NestJS, a progressive Node.js framework for building efficient and scalable server-side applications. Data persistence is managed using PostgreSQL. The app is containerized with Docker.
 
 ## Homework Task
 
